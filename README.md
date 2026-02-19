@@ -1,104 +1,25 @@
-## CGF - Somatório de Volume Faturado
+## CGF – Somatório de Volume Faturado
 
-Aplicativo desktop em **Python + Tkinter** para calcular o **volume final CGF** a partir de três planilhas Excel:
+Aplicativo desktop em **Python + Tkinter** para calcular, de forma padronizada, o **volume final CGF** a partir de três planilhas Excel do mês:
 
 - `NF Faturada e complementar.xlsx`
 - `NF canceladas e denegadas.xlsx`
 - `NF devolução dez.25.xlsx`
 
-O sistema:
+O sistema consolida os dados e entrega **um único número de volume** já pronto para relatório/regulador:
 
-- Soma o **volume faturado** da NF faturada/complementar.
-- Subtrai o volume de **canceladas/denegadas**.
-- Subtrai o volume de **devoluções**.
-- Subtrai o volume de **consumo próprio** dentro da NF faturada (linha identificada por texto na coluna escolhida).
+- **Somando** o volume faturado para clientes.
+- **Descontando** canceladas, denegadas, devoluções e consumo próprio.
 
 ---
 
-### 1. Requisitos
+## Visão geral rápida
 
-- Python 3.9 ou superior instalado (no Windows já está ok na sua máquina).
-- Bibliotecas Python:
-  - `pandas`
-  - `openpyxl` (para ler `.xlsx`)
+- **Entrada**: 3 arquivos Excel (faturadas, canceladas, devoluções).
+- **Configuração**: você informa só os **nomes das colunas** conforme o cabeçalho do Excel.
+- **Saída**: `Volume Final CGF` + log detalhado do que foi somado e subtraído.
 
-Instalação rápida (no PowerShell, dentro da pasta do projeto):
-
-```bash
-pip install pandas openpyxl
-```
-
----
-
-### 2. Como rodar o programa
-
-1. Abra o PowerShell na pasta `CGF`.
-2. Execute:
-
-```bash
-python CGF..py
-```
-
-3. A janela do sistema CGF abrirá.
-
----
-
-### 3. Uso da interface
-
-#### 3.1. Card “Arquivos do mês”
-
-- **Carregar padrões**: carrega automaticamente os três caminhos configurados no código (`DEFAULT_FILES`).
-- **Selecionar...**: permite escolher manualmente arquivos `.xlsx` ou `.csv`.
-- **Limpar**: zera a lista de arquivos.
-
-Você pode usar tanto os caminhos padrão quanto escolher manualmente outros arquivos do mês.
-
-#### 3.2. Abas de configuração
-
-Na parte de baixo esquerda existem 3 abas:
-
-- **NF Faturada**
-- **NF Canceladas**
-- **NF Devolução**
-
-Em cada aba você informa **o nome exato das colunas do Excel** (cabeçalho) para aquele arquivo.
-
-##### NF Faturada
-
-- **Coluna de volume faturado**: cabeçalho da coluna que guarda o volume da NF (ex.: `Volume Faturado`).
-- **Coluna que indica consumo próprio**: coluna onde aparece o texto de consumo próprio (ex.: `Descricao`).
-- **Texto exato para consumo próprio**: texto que identifica as linhas de consumo próprio (ex.: `CONSUMO PROPRIO`).
-- **(Opcional) Coluna CFOP**: se quiser usar/visualizar o CFOP no log.
-- **Colunas extras (opcional)**: lista de outras colunas que você quer apenas verificar se existem (para conferência). Não entram no cálculo, só aparecem no log.
-
-##### NF Canceladas
-
-- **Coluna de volume (canceladas)**: cabeçalho da coluna com o volume de notas canceladas/denegadas.
-- **Colunas extras (opcional)**: campos só para checar se colunas existem; não mudam o cálculo.
-
-##### NF Devolução
-
-- **Coluna de volume (devoluções)**: cabeçalho da coluna com o volume devolvido.
-- **Colunas extras (opcional)**: idem acima, apenas conferência.
-
----
-
-### 4. Cálculo realizado
-
-Depois de configurar as colunas para cada planilha, clique no botão **CALCULAR** (card da direita).
-
-O programa faz:
-
-1. **NF Faturada e complementar**
-   - Soma o volume da coluna de **volume faturado**, excluindo as linhas marcadas como **consumo próprio**.
-2. **NF canceladas e denegadas**
-   - Soma o volume da coluna informada e **subtrai** do total.
-3. **NF devolução**
-   - Soma o volume da coluna informada e **subtrai** do total.
-4. **Consumo próprio**
-   - O volume das linhas de consumo próprio é **subtraído** do faturado.
-
-Fórmula final:
+Fórmula de negócio utilizada:
 
 \[
 \text{Volume Final CGF} =
@@ -108,16 +29,127 @@ Fórmula final:
 - \text{Consumo Próprio}
 \]
 
-O resultado aparece em destaque como **“Volume Final CGF”** e o log à direita mostra os detalhes de cada arquivo processado.
+---
+
+## 1. Requisitos
+
+- **Python**: 3.9 ou superior.
+- **Bibliotecas Python**:
+  - `pandas`
+  - `openpyxl` (para ler arquivos `.xlsx`)
+
+Instalação rápida (no PowerShell, dentro da pasta do projeto):
+
+```bash
+pip install pandas openpyxl
+```
 
 ---
 
-### 5. Ajustando para outros meses / pastas
+## 2. Como rodar
 
-Se você trocar o mês ou a pasta dos arquivos, existem duas opções:
+1. Abra o PowerShell na pasta `CGF`.
+2. Execute:
 
-- Usar **Selecionar...** e escolher manualmente os novos arquivos.
-- Alterar os caminhos em `DEFAULT_FILES` no começo do arquivo `CGF..py`.
+```bash
+python CGF..py
+```
+
+3. A janela do sistema será aberta.
+
+---
+
+## 3. Interface – passo a passo
+
+### 3.1 Card **“Arquivos do mês”**
+
+- **Carregar padrões**: usa os caminhos definidos em `DEFAULT_FILES` (no início de `CGF..py`).
+- **Selecionar...**: escolha manualmente arquivos `.xlsx` ou `.csv` do mês.
+- **Limpar**: esvazia a lista de arquivos carregados.
+
+Você pode:
+
+- Trabalhar sempre com os **caminhos padrão**, ou
+- Selecionar manualmente os arquivos de qualquer pasta/mês.
+
+### 3.2 Abas de configuração por planilha
+
+Na parte inferior esquerda há 3 abas, uma para cada tipo de arquivo:
+
+- **NF Faturada**
+- **NF Canceladas**
+- **NF Devolução**
+
+Em todas as abas a regra é a mesma: preencher o **nome exato da coluna** conforme o cabeçalho do Excel.
+
+#### Aba **NF Faturada**
+
+- **Coluna de volume faturado**  
+  Cabeçalho da coluna com o volume faturado (ex.: `Volume Faturado`).
+
+- **Coluna que indica consumo próprio**  
+  Coluna onde aparece a descrição/situação da NF que identifica consumo próprio (ex.: `Descricao`).  
+
+- **Texto exato para consumo próprio**  
+  Texto que aparece nessa coluna para marcar consumo próprio (ex.: `CONSUMO PROPRIO`).  
+  Todas as linhas com esse texto serão **separadas e subtraídas**.
+
+- **(Opcional) Coluna CFOP**  
+  Se preenchida, o CFOP é lido e exibido no log para conferência.
+
+- **Colunas extras (opcional)**  
+  Lista de outras colunas que você quer apenas verificar se existem.  
+  Elas **não entram na conta**, servem só para checagem no log (ex.: `CLIENTE`, `MUNICIPIO`, etc.).
+
+#### Aba **NF Canceladas**
+
+- **Coluna de volume (canceladas)**  
+  Cabeçalho da coluna com o volume das NFs canceladas/denegadas.
+
+- **Colunas extras (opcional)**  
+  Apenas para checar se certas colunas existem; não alteram o cálculo.
+
+#### Aba **NF Devolução**
+
+- **Coluna de volume (devoluções)**  
+  Cabeçalho da coluna com o volume devolvido.
+
+- **Colunas extras (opcional)**  
+  Idem acima, apenas conferência.
+
+---
+
+## 4. O que o sistema calcula exatamente
+
+Depois de configurar as colunas, clique em **CALCULAR** (card da direita).
+
+O fluxo interno é:
+
+1. **NF Faturada e complementar**
+   - Converte a coluna de volume para número.
+   - Separa as linhas marcadas como **consumo próprio**:
+     - Somatório de **faturado (sem consumo próprio)** → entra positivo.
+     - Somatório de **consumo próprio** → entra negativo.
+2. **NF canceladas e denegadas**
+   - Converte a coluna de volume para número.
+   - Soma o volume total de canceladas/denegadas → entra negativo.
+3. **NF devolução**
+   - Converte a coluna de volume para número.
+   - Soma o volume total devolvido → entra negativo.
+4. **Resumo final**
+   - Mostra no log todos os parciais e o **Volume Final CGF** em destaque.
+
+---
+
+## 5. Ajustando para outros meses ou pastas
+
+Você tem duas formas de trocar os arquivos do mês:
+
+- **Pela interface**  
+  Usar o botão **Selecionar...** e escolher manualmente os novos arquivos.
+
+- **Pelo código (padrões automáticos)**  
+  Alterar a lista `DEFAULT_FILES` no início de `CGF..py`:
 
 ```python
 DEFAULT_FILES = [
@@ -129,13 +161,22 @@ DEFAULT_FILES = [
 
 ---
 
-### 6. Problemas comuns
+## 6. Troubleshooting (erros comuns)
 
-- **Erro: coluna não encontrada**  
-  Verifique se o nome digitado na tela é exatamente igual ao cabeçalho do Excel (acentos, espaços, maiúsculas/minúsculas).
+- **“Coluna de volume não encontrada”**  
+  - Verifique se o nome digitado na tela é **idêntico** ao cabeçalho do Excel (acentos, maiúsculas/minúsculas, espaços).
 
-- **Volume final estranho**  
-  Teste com poucas linhas (filtrando no Excel) e compare a conta manual com o que o sistema retorna. Ajuste nomes de colunas e texto de consumo próprio se necessário.
+- **Volume final muito diferente do esperado**  
+  - Teste com poucas linhas (filtrando no Excel) e faça a conta manual.
+  - Confirme:
+    - Coluna de volume correta em cada aba.
+    - Nome da coluna de consumo próprio.
+    - Texto exato de consumo próprio.
 
-Se quiser evoluir o sistema (exportar relatório, salvar configurações por mês, etc.), é só pedir. :)
+- **Erro ao abrir arquivo**  
+  - Confira se nenhum dos arquivos está aberto bloqueando gravação/leitura.
+  - Verifique se a extensão é suportada (`.xlsx`, `.xls` ou `.csv`).
 
+---
+
+Se você quiser evoluir esse sistema (exportar o log para Excel, salvar presets de configuração por mês, gerar gráficos, etc.), a base já está preparada para isso. É só pedir. 😉
